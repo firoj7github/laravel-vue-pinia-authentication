@@ -41,16 +41,21 @@
 <script setup>
 import {ref} from 'vue'
 import {useAuthStore} from '../stores/auth'
+import { useToast } from 'vue-toastification';
+import { useRouter } from 'vue-router';
 
-
-
+const router = useRouter();
+const toast = useToast();
 const email = ref('');
 const password = ref('');
 const auth = useAuthStore();
 
 const login = async ()=>{
   await auth.login(email.value, password.value)
-  console.log(auth.error?.email);
+  if (auth.token){
+    toast.success('Login Successful');
+    await router.push('/profile');
+  }
 }
 </script>
 

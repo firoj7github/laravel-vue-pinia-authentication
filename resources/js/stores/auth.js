@@ -9,14 +9,15 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
     token: localStorage.getItem('token') || null,
-    error: null
+    error: null,
+    success: null,
   }),
 
   actions: {
     async login(email, password) {
       try {
         const res = await axios.post('/api/login', { email, password });
-        // console.log(res);
+        console.log(res);
         this.token = res.data.token;
         this.user = res.data.user;
         this.error = null;
@@ -33,11 +34,17 @@ export const useAuthStore = defineStore('auth', {
           };
         }
         this.token = null;
-        this.user = null;
+        // this.user = null;
       }
     },
 
-    logout() {
+    async logout() {
+      try{
+        await axios.post('/api/logout');
+        this.success = res.data.message;
+      }catch(err){
+        console.error('Logout request failed:', err);
+      }
       this.user = null;
       this.token = null;
       localStorage.removeItem('token');
@@ -45,3 +52,4 @@ export const useAuthStore = defineStore('auth', {
     }
   }
 });
+

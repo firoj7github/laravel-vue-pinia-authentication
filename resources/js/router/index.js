@@ -5,22 +5,30 @@ import { useAuthStore } from '../stores/auth'; // Import auth store
 
 const routes = [
   {
-    path: '/login',
-    component: Login,
-    beforeEnter: (to, from, next) => {
-        const auth = useAuthStore(); // Access auth store
-        if (auth.token) {
-          next('/login'); // If not authenticated, redirect to login page
-        } else {
-          next(); // Otherwise, proceed to the profile page
-        }
-      }
-  },
-  {
-    path: '/profile',
-    component: Profile,
-    
+  path: '/login',
+  component: Login,
+  beforeEnter: (to, from, next) => {
+    const auth = useAuthStore();
+    if (auth.token) {
+      next('/profile'); // যদি লগিন থাকে, প্রোফাইলে পাঠাও
+    } else {
+      next(); // লগিন না থাকলে লগিন পেজ দেখাও
+    }
   }
+},
+{
+  path: '/profile',
+  component: Profile,
+  beforeEnter: (to, from, next) => {
+    const auth = useAuthStore();
+    if (!auth.token) {
+      next('/login'); // লগিন না থাকলে লগিন পেজে পাঠাও
+    } else {
+      next(); // লগিন থাকলে প্রোফাইল দেখাও
+    }
+  }
+}
+
 ];
 
 const router = createRouter({

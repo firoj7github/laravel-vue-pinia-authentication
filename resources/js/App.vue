@@ -1,6 +1,6 @@
 <template>
     <Navbar/>
-    <div>
+    <div class="pt-16 min-h-screen bg-gray-50">
         
       
     <router-view/>

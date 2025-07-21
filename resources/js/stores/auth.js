@@ -1,4 +1,3 @@
-// stores/auth.js
 import { defineStore } from 'pinia';
 import axios from 'axios';
 
@@ -17,32 +16,64 @@ export const useAuthStore = defineStore('auth', {
     async login(email, password) {
       try {
         const res = await axios.post('/api/login', { email, password });
-        console.log(res);
         this.token = res.data.token;
         this.user = res.data.user;
-        this.error = null;
 
         localStorage.setItem('token', this.token);
         axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
+        this.error = null;
       } catch (err) {
-        console.log(err.response);
-        if(err.response && err.response.status === 422){
+        this.token = null;
+        this.user = null;
+        if (err.response && err.response.status === 422) {
           this.error = err.response.data.errors || {};
-        }else{
+        } else {
           this.error = {
             general: [err.response?.data?.message || 'Login failed'],
           };
         }
-        this.token = null;
-        // this.user = null;
+      }
+    },
+
+    
+
+    async getUser() {
+      try {
+        const res = await axios.get('/api/user');
+        this.user = res.data;
+      } catch (err) {
+        this.user = null;
+        console.error('User fetch failed:', err);
+        // Optional: auto-logout on invalid token
+        if (err.response?.status === 401) {
+          this.logout();
+        }
+      }
+    },
+
+    async profileUpdate (data){
+      try{
+        const res = await axios.put('/api/auth/profile/update', data);
+        console.log(res);
+        this.user = res.data.user;
+      }catch(err){
+        this.error = err.response?.data || "Update failed";
+      }
+      
+
+    },
+
+    init() {
+      if (this.token) {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
+        this.getUser();
       }
     },
 
     async logout() {
-      try{
+      try {
         await axios.post('/api/logout');
-        this.success = res.data.message;
-      }catch(err){
+      } catch (err) {
         console.error('Logout request failed:', err);
       }
       this.user = null;
@@ -52,4 +83,3 @@ export const useAuthStore = defineStore('auth', {
     }
   }
 });
-
